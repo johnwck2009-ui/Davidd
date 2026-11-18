@@ -1,3 +1,4 @@
+import asyncio
 import logging, os, sqlite3
 from datetime import datetime, timezone
 from threading import Thread
@@ -234,7 +235,15 @@ def main():
     app.add_handler(CallbackQueryHandler(button_router, pattern="^(trades|stats|help)$"))
     Thread(target=lambda: web.run(host="0.0.0.0", port=PORT, use_reloader=False), daemon=True).start()
     log.info("Trading Journal bot is running")
-    app.run_polling(drop_pending_updates=True)
+    # Python 3.14 no longer creates the main-thread event loop implicitly.
+    # Create and install one before python-telegram-bot's run_polling().
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        app.run_polling(drop_pending_updates=True)
+    finally:
+        if not loop.is_closed():
+            loop.close()
 
 if __name__ == "__main__":
     main()

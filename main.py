@@ -46,8 +46,8 @@ def fmt(value):
     return "—" if value is None else f"{value:,.2f}"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = ("📊 *Welcome to Trading Journal!*\\n\\n"
-            "Record your trades, review results and keep your trading history organized.\\n\\n"
+    text = ("📊 *Welcome to Trading Journal!*\n\n"
+            "Record your trades, review results and keep your trading history organized.\n\n"
             "Choose an option below to get started. Your journal is private to your Telegram account.")
     if update.callback_query:
         await update.callback_query.answer()
@@ -57,9 +57,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.effective_message.reply_text(
-        "*How to use*\\n• Add trade — record a position\\n• My trades — see your latest records\\n"
-        "• Statistics — review your recorded results\\n• /delete ID — remove one of your trades\\n"
-        "• /cancel — stop entering a trade\\n\\nThis bot records information you enter. It does not provide trading signals or investment advice.",
+        "*How to use*\n• Add trade — record a position\n• My trades — see your latest records\n"
+        "• Statistics — review your recorded results\n• /delete ID — remove one of your trades\n"
+        "• /cancel — stop entering a trade\n\nThis bot records information you enter. It does not provide trading signals or investment advice.",
         parse_mode="Markdown", reply_markup=keyboard())
 
 async def begin_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -68,7 +68,7 @@ async def begin_add(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.answer()
         await update.callback_query.message.reply_text("Enter the market or symbol (e.g. EURUSD, XAUUSD or BTCUSDT):")
     else:
-        await update.effective_message.reply_text("➕ *New trade*\\n\\nEnter the market or symbol (e.g. EURUSD, XAUUSD or BTCUSDT):", parse_mode="Markdown")
+        await update.effective_message.reply_text("➕ *New trade*\n\nEnter the market or symbol (e.g. EURUSD, XAUUSD or BTCUSDT):", parse_mode="Markdown")
     return SYMBOL
 
 async def symbol_step(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -139,9 +139,9 @@ async def notes_step(update: Update, context: ContextTypes.DEFAULT_TYPE):
              t.get("pnl"),note[:1000],t["status"],datetime.now(timezone.utc).isoformat()))
         trade_id = cur.lastrowid
     await update.message.reply_text(
-        f"✅ *Trade saved!*\\nID: #{trade_id}\\nSymbol: *{t['symbol']}*\\nDirection: *{t['side']}*"
-        f"\\nEntry: {fmt(t['entry'])}\\nExit: {fmt(t.get('exit')) if t.get('exit') is not None else 'Open'}"
-        f"\\nP/L: {fmt(t.get('pnl'))}\\nStatus: *{t['status']}*",
+        f"✅ *Trade saved!*\nID: #{trade_id}\nSymbol: *{t['symbol']}*\nDirection: *{t['side']}*"
+        f"\nEntry: {fmt(t['entry'])}\nExit: {fmt(t.get('exit')) if t.get('exit') is not None else 'Open'}"
+        f"\nP/L: {fmt(t.get('pnl'))}\nStatus: *{t['status']}*",
         parse_mode="Markdown", reply_markup=keyboard())
     return ConversationHandler.END
 
@@ -155,14 +155,14 @@ async def trades(update: Update, context: ContextTypes.DEFAULT_TYPE):
         rows = con.execute("SELECT * FROM trades WHERE user_id=? ORDER BY id DESC LIMIT 10",
                            (update.effective_user.id,)).fetchall()
     if not rows:
-        text = "📒 *Your journal is empty.*\\nTap Add trade to record your first trade."
+        text = "📒 *Your journal is empty.*\nTap Add trade to record your first trade."
     else:
         lines = ["📒 *Your 10 most recent trades*"]
         for r in rows:
             exit_value = fmt(r["exit"]) if r["exit"] is not None else "Open"
-            lines.append(f"\\n*#{r['id']} {r['symbol']} — {r['side']}*\\nEntry: {fmt(r['entry'])} | Exit: {exit_value}\\nStatus: {r['status']} | P/L: {fmt(r['pnl'])}")
-        lines.append("\\nUse /delete ID to remove a record.")
-        text = "\\n".join(lines)
+            lines.append(f"\n*#{r['id']} {r['symbol']} — {r['side']}*\nEntry: {fmt(r['entry'])} | Exit: {exit_value}\nStatus: {r['status']} | P/L: {fmt(r['pnl'])}")
+        lines.append("\nUse /delete ID to remove a record.")
+        text = "\n".join(lines)
     if update.callback_query:
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=keyboard())
@@ -181,11 +181,11 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wins, losses = r["wins"] or 0, r["losses"] or 0
     decided = wins + losses
     rate = wins / decided * 100 if decided else 0
-    text = ("📊 *Your trading statistics*\\n\\n"
-      f"Total records: *{r['total'] or 0}*\\nOpen trades: *{r['opened'] or 0}*\\n"
-      f"Closed trades: *{r['closed'] or 0}*\\nRecorded wins: *{wins}*\\n"
-      f"Recorded losses: *{losses}*\\nWin rate (trades with positive/negative P/L): *{rate:.1f}%*\\n"
-      f"Recorded total P/L: *{fmt(r['total_pnl'] or 0)}*\\n\\n"
+    text = ("📊 *Your trading statistics*\n\n"
+      f"Total records: *{r['total'] or 0}*\nOpen trades: *{r['opened'] or 0}*\n"
+      f"Closed trades: *{r['closed'] or 0}*\nRecorded wins: *{wins}*\n"
+      f"Recorded losses: *{losses}*\nWin rate (trades with positive/negative P/L): *{rate:.1f}%*\n"
+      f"Recorded total P/L: *{fmt(r['total_pnl'] or 0)}*\n\n"
       "_Based only on the P/L values you enter. This is a record-keeping tool, not a forecast._")
     if update.callback_query:
         await update.callback_query.answer()
